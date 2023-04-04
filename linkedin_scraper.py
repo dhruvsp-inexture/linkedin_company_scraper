@@ -4,22 +4,43 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from dotenv import load_dotenv
 import os
-
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium_stealth import stealth
+
+options = webdriver.ChromeOptions()
+options.add_argument("start-maximized")
+options.add_argument("--disable-extensions")
+options.add_argument("--disable-gpu")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-browser-side-navigation")
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_argument("--disable-features=VizDisplayCompositor")
+options.add_argument("--enable-javascript")
+
+
 
 load_dotenv()
 
 PATH = "/home/root352/Downloads/chromedriver"
-driver = webdriver.Chrome(PATH)
+driver = webdriver.Chrome(executable_path=PATH, options=options)
+
+stealth(driver,
+        languages=["en-US", "en"],
+        vendor="Google Inc.",
+        platform="Win32",
+        webgl_vendor="Intel Inc.",
+        renderer="Intel Iris OpenGL Engine",
+        fix_hairline=True)
+
 driver.get("https://www.linkedin.com/login/")
 driver.maximize_window()
 # https://www.linkedin.com/search/results/companies/
 
 login_form_email = driver.find_element(By.ID, "username")
-login_form_email.send_keys(os.environ.get("EMAIL"))
+login_form_email.send_keys(os.environ.get("EMAIL1"))
 
 login_form_password = driver.find_element(By.ID, "password")
-login_form_password.send_keys(os.environ.get("PASSWORD"))
+login_form_password.send_keys(os.environ.get("PASSWORD1"))
 
 login_submit_button = driver.find_element(By.CLASS_NAME, "from__button--floating").click()
 
