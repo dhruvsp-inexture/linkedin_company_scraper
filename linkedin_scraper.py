@@ -97,4 +97,17 @@ while next_page_button.is_enabled():
 
 print(company_list)
 
+company_data = {}
+for company in company_list:
+    driver.get(company)
+    company_name = driver.find_element(By.TAG_NAME, 'h1').text
+    company_about_data_headings = driver.find_elements(By.CSS_SELECTOR, 'dt.mb1.text-heading-small')
+    company_about_data_text = driver.find_elements(By.CSS_SELECTOR, 'dd.mb4.text-body-small')
+    company_about_data = {}
+    for key, value in zip(company_about_data_headings, company_about_data_text):
+        company_about_data[key.text] = value.text
+    company_data[company_name] = company_about_data
+
+print(company_data)
+
 time.sleep(5)
