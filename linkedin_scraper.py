@@ -83,9 +83,12 @@ size_201_to_500_checkbox = (all_checkboxes[3]).find_element(By.TAG_NAME, "label"
 show_results_button = driver.find_element(By.CLASS_NAME,
                                           "search-reusables__secondary-filters-show-results-button").click()
 
-
 company_list = []
-next_page_button = WebDriverWait(driver, timeout=10).until(lambda d:d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
+time.sleep(2)
+ActionChains(driver).send_keys(Keys.END).perform()
+next_page_button = WebDriverWait(driver, timeout=10).until(
+    lambda d: d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
+
 while next_page_button.is_enabled():
     companies = WebDriverWait(driver, timeout=10).until(
         lambda d: d.find_elements(By.CLASS_NAME, "entity-result__title-text"))
@@ -93,21 +96,38 @@ while next_page_button.is_enabled():
         company_link = company.find_element(By.CLASS_NAME, "app-aware-link ").get_attribute('href')
         company_list.append(f'{company_link}about/')
     next_page_button.click()
-    next_page_button = WebDriverWait(driver, timeout=10).until(lambda d:d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
-
-print(company_list)
+    next_page_button = WebDriverWait(driver, timeout=10).until(
+        lambda d: d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
 
 company_data = {}
+
 for company in company_list:
     driver.get(company)
     company_name = driver.find_element(By.TAG_NAME, 'h1').text
-    company_about_data_headings = driver.find_elements(By.CSS_SELECTOR, 'dt.mb1.text-heading-small')
-    company_about_data_text = driver.find_elements(By.CSS_SELECTOR, 'dd.mb4.text-body-small')
-    company_about_data = {}
-    for key, value in zip(company_about_data_headings, company_about_data_text):
-        company_about_data[key.text] = value.text
-    company_data[company_name] = company_about_data
+    about_data = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(By.TAG_NAME, "dl"))
+    company_about_data_headings = about_data.find_elements(By.TAG_NAME, "dt")
+    company_about_data_text = about_data.find_elements(By.TAG_NAME, "dd")
+    company_about_data = {
+        'Website': 'NA',
+        'Industry': 'NA',
+        'Company size': 'NA',
+        'Headquarters': 'NA',
+        'Specialties': 'NA',
+        'Founded': 'NA'
+    }
 
-print(company_data)
+    for i in range(len(company_about_data_headings)):
+        if company_about_data_headings[i].text == "Company size":
+            if "members" in company_about_data_text[i + 1].text:
+                value = f'{company_about_data_text[i].text} {company_about_data_text[i + 1].text}'
+                company_about_data_text.pop(i + 1)
+            else:
+                value = company_about_data_text[i].text
+        else:
+            value = company_about_data_text[i].text
+        company_about_data[company_about_data_headings[i].text] = value
+
+    company_data[company_name] = company_about_data
+    print(company_data)
 
 time.sleep(5)
