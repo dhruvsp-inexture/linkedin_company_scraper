@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium_stealth import stealth
+import csv
+import pandas as pd
 
 options = webdriver.ChromeOptions()
 options.add_argument("start-maximized")
@@ -84,21 +86,30 @@ show_results_button = driver.find_element(By.CLASS_NAME,
                                           "search-reusables__secondary-filters-show-results-button").click()
 
 company_list = []
+
 footer = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(By.TAG_NAME, "footer"))
 ActionChains(driver).send_keys(Keys.END).perform()
 next_page_button = WebDriverWait(driver, timeout=10).until(
     lambda d: d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
 
-while next_page_button.is_enabled():
+while True:
     companies = WebDriverWait(driver, timeout=10).until(
         lambda d: d.find_elements(By.CLASS_NAME, "entity-result__title-text"))
     for company in companies:
         company_link = company.find_element(By.CLASS_NAME, "app-aware-link ").get_attribute('href')
         company_list.append(f'{company_link}about/')
-    next_page_button.click()
     next_page_button = WebDriverWait(driver, timeout=10).until(
         lambda d: d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
+    if not next_page_button.is_enabled():
+        companies = WebDriverWait(driver, timeout=10).until(
+            lambda d: d.find_elements(By.CLASS_NAME, "entity-result__title-text"))
+        for company in companies:
+            company_link = company.find_element(By.CLASS_NAME, "app-aware-link ").get_attribute('href')
+            company_list.append(f'{company_link}about/')
+        break
+    next_page_button.click()
 
+print(company_list)
 company_data = {}
 
 for company in company_list:
@@ -113,7 +124,8 @@ for company in company_list:
         'Company size': 'NA',
         'Headquarters': 'NA',
         'Specialties': 'NA',
-        'Founded': 'NA'
+        'Founded': 'NA',
+        'Phone': 'NA'
     }
 
     for i in range(len(company_about_data_headings)):
@@ -129,5 +141,7 @@ for company in company_list:
 
     company_data[company_name] = company_about_data
     print(company_data)
+df = pd.DataFrame(company_data)
 
-time.sleep(5)
+df.to_csv('linkedin_data.csv')
+driver.close()
