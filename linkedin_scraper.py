@@ -84,7 +84,7 @@ show_results_button = driver.find_element(By.CLASS_NAME,
                                           "search-reusables__secondary-filters-show-results-button").click()
 
 company_list = []
-time.sleep(2)
+footer = WebDriverWait(driver, timeout=10).until(lambda d: d.find_element(By.TAG_NAME, "footer"))
 ActionChains(driver).send_keys(Keys.END).perform()
 next_page_button = WebDriverWait(driver, timeout=10).until(
     lambda d: d.find_element(By.CLASS_NAME, "artdeco-pagination__button--next"))
